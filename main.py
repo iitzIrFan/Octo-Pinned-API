@@ -19,8 +19,8 @@ HEADERS = {
 
 # CORS Middleware
 origins = [
-    "http://127.0.0.1:5500/index.html",
-    "https://irfan-shaikh-portfolio.vercel.app/",
+    "http://127.0.0.1:5500/index.html", # Local development
+    "https://irfan-shaikh-portfolio.vercel.app/", #Production
 ]
 app.add_middleware(
     CORSMiddleware,
