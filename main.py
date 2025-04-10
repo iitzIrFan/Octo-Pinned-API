@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
@@ -8,13 +9,26 @@ load_dotenv()
 
 app = FastAPI()
 
-# Configuration
+# GitHub Configuration
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
 
 HEADERS = {
     "Authorization": f"Bearer {GITHUB_TOKEN}"
 }
+
+# CORS Middleware
+origins = [
+    "http://127.0.0.1:5500/index.html",
+    "https://irfan-shaikh-portfolio.vercel.app/",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # GraphQL query to get pinned repositories
 GRAPHQL_QUERY = f"""
