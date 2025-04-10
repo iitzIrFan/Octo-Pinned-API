@@ -22,7 +22,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://irfan-shaikh-portfolio.vercel.app",
-        "http://localhost:3000"  # for local dev (optional)
+        "http://localhost:5500"  # for local dev (optional)
     ],
     allow_credentials=True,
     allow_methods=["*"],
