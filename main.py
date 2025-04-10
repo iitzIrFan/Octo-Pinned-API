@@ -17,14 +17,13 @@ HEADERS = {
     "Authorization": f"Bearer {GITHUB_TOKEN}"
 }
 
-# CORS Middleware
-origins = [
-    "http://127.0.0.1:5500/index.html", # Local development
-    "https://irfan-shaikh-portfolio.vercel.app/", #Production
-]
+# CORS Middlewarex
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[
+        "https://irfan-shaikh-portfolio.vercel.app",
+        "http://localhost:3000"  # for local dev (optional)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
