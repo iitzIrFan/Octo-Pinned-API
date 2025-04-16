@@ -9,6 +9,9 @@ load_dotenv()
 
 app = FastAPI()
 
+# Define allowed origins BEFORE using them
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
+
 # GitHub Configuration
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
@@ -17,7 +20,7 @@ HEADERS = {
     "Authorization": f"Bearer {GITHUB_TOKEN}"
 }
 
-# CORS Middlewarex
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
