@@ -10,7 +10,12 @@ load_dotenv()
 app = FastAPI()
 
 # Define allowed origins BEFORE using them
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS")
+if allowed_origins:
+    allowed_origins = allowed_origins.split(",")
+else:
+    allowed_origins = ["*"]  # or raise an error / use default list
+
 
 # GitHub Configuration
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
