@@ -20,11 +20,7 @@ HEADERS = {
 # CORS Middlewarex
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-      "https://irfan-shaikh-portfolio.vercel.app",
-      "http://localhost:5500",
-      "http://127.0.0.1:5500"
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
