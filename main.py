@@ -9,13 +9,12 @@ load_dotenv()
 
 app = FastAPI()
 
-# Define allowed origins BEFORE using them
+# Define allowed origins
 allowed_origins = os.getenv("ALLOWED_ORIGINS")
 if allowed_origins:
     allowed_origins = allowed_origins.split(",")
 else:
-    allowed_origins = ["*"]  # or raise an error / use default list
-
+    allowed_origins = ["*"]  # Default to all origins if not specified
 
 # GitHub Configuration
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -34,7 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# GraphQL query to get pinned repositories
+# GraphQL query to get pinned repositories including homepageUrl
 GRAPHQL_QUERY = f"""
 query {{
   user(login: "{GITHUB_USERNAME}") {{
@@ -44,6 +43,7 @@ query {{
           name
           description
           url
+          homepageUrl
           stargazerCount
           forkCount
           languages(first: 1) {{
@@ -58,11 +58,10 @@ query {{
 }}
 """
 
-# Using FastAPIs decorator to create a GET endpoint at /api/pinned
+# GET endpoint to fetch pinned repositories
 @app.get("/api/pinned")
 async def get_pinned():
     try:
-        # request code
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 'https://api.github.com/graphql',
@@ -71,6 +70,7 @@ async def get_pinned():
             )
             response.raise_for_status()
             data = response.json()
+
             return data["data"]["user"]["pinnedItems"]["nodes"]
     except Exception as e:
         return {"error": str(e)}
