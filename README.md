@@ -1,3 +1,4 @@
+![](https://api.checklyhq.com/v1/badges/checks/3123e1d7-c9e9-4cd2-9745-073ad76b3b5d?style=for-the-badge&theme=default)
 # GitHub Pinned Repositories API
 
 A FastAPI application that creates an API endpoint to fetch pinned repositories from a GitHub profile using GitHub's GraphQL API.
