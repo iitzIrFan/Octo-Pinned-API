@@ -75,7 +75,7 @@ GET http://localhost:8000/api/pinned
         }
       ]
     },
-    "image": "https://repository-images.githubusercontent.com/123456/abcdef"
+    "image": "https://octo-pinned-api.onrender.com/cached-images/repo-name-1a2b3c4d5e.webp"
   }
 ]
 ```
@@ -92,6 +92,14 @@ Each repository's `image` is resolved in this order — the first one found wins
 
 Steps 3 and 4 are looked up once per site and cached for 24 hours (1 hour if nothing was found), so the screenshot service is only called a couple of times a day.
 
+### Served by the API
+
+Images from steps 2–5 are downloaded by the API, resized to 800px wide WebP (typically 5–30 KB) and served from memory at `/cached-images/<repo>-<hash>.webp` with a one-week browser cache. Browsers never hotlink GitHub's image hosts, which can be very slow or rate-limited (`429`).
+
+- Each source image is re-downloaded once a day; the URL only changes when the image does.
+- Downloads run in the background and never delay `/api/pinned`. Until an image is cached (e.g. right after a restart, or if a download fails), `image` is the original URL; failed downloads are retried on the next refresh.
+- Override files (step 1) are served as-is from `/images/`.
+
 ### Adding an override
 
 1. Add an image named after the repository, e.g. `static/projects/TastyTrails.webp`. A landscape image around 1200×630 works best.
@@ -102,6 +110,7 @@ Steps 3 and 4 are looked up once per site and cached for 24 hours (1 hour if not
 - Repository data is cached in memory for 10 minutes. When it expires, the next request gets the cached data right away and a refresh runs in the background.
 - On startup the cache is warmed in the background (when `PUBLIC_BASE_URL` is set), so the first request after a deploy or restart doesn't wait. Without a warm cache, the first request waits for the fetch (~1–3s); concurrent requests share that single fetch.
 - If a refresh fails, the cached data keeps being served and the refresh is retried after 60 seconds.
+- Preview images are cached separately (see [Served by the API](#served-by-the-api)).
 - The cache lives in memory, so it is emptied on every restart or redeploy.
 
 ## Error Handling
@@ -122,7 +131,7 @@ If GitHub fails but a previous response is cached, the cached data is returned i
 
 - `GITHUB_TOKEN`: Your GitHub Personal Access Token
 - `GITHUB_USERNAME`: GitHub username whose pinned repositories you want to fetch
-- `PUBLIC_BASE_URL`: Public URL of this API (e.g. `https://octo-pinned-api.onrender.com`), used to build override image URLs. Set it in production: behind a proxy the API may otherwise build `http://` URLs that browsers block on HTTPS sites.
+- `PUBLIC_BASE_URL`: Public URL of this API (e.g. `https://octo-pinned-api.onrender.com`), used to build image URLs. Set it in production: behind a proxy the API may otherwise build `http://` URLs that browsers block on HTTPS sites.
 - `ALLOWED_ORIGINS` (optional): Comma-separated list of origins allowed to call the API. Defaults to `*`.
 
 ## License
