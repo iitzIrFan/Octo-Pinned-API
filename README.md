@@ -15,7 +15,7 @@ A FastAPI application that creates an API endpoint to fetch pinned repositories 
   - Primary programming language
   - A preview image (`image`), resolved automatically (see [Preview images](#preview-images))
 - Pin or unpin a repository on GitHub and the API picks it up, image included — no frontend changes needed
-- Cached responses (10 minutes for repository data, 24 hours for live-site images), refreshed in the background so requests don't wait (see [Caching](#caching))
+- Cached responses (10 minutes for repository data, 24 hours for preview images), refreshed in the background so requests don't wait (see [Caching](#caching))
 - Proper HTTP error codes
 
 ## Prerequisites
@@ -98,6 +98,7 @@ Images from steps 2–5 are downloaded by the API, resized to 800px wide WebP (t
 
 - Each source image is re-downloaded once a day; the URL only changes when the image does.
 - Downloads run in the background and never delay `/api/pinned`. Until an image is cached (e.g. right after a restart, or if a download fails), `image` is the original URL; failed downloads are retried on the next refresh.
+- Each download gives up after 45 seconds; while a re-download is in progress or after it fails, the previous copy keeps being served.
 - Override files (step 1) are served as-is from `/images/`.
 
 ### Adding an override
@@ -112,6 +113,22 @@ Images from steps 2–5 are downloaded by the API, resized to 800px wide WebP (t
 - If a refresh fails, the cached data keeps being served and the refresh is retried after 60 seconds.
 - Preview images are cached separately (see [Served by the API](#served-by-the-api)).
 - The cache lives in memory, so it is emptied on every restart or redeploy.
+
+### When changes show up
+
+| Change | Visible on the API within |
+|---|---|
+| Pin, unpin or reorder a repository; stars, forks, description or live URL change | 10–15 minutes |
+| New custom social preview uploaded on GitHub (its image URL changes) | 10–15 minutes |
+| Live site changes its `og:image` / `twitter:image` to a new URL | up to 24 hours |
+| Image updated at the same URL (social preview, site preview or screenshot) | up to 24 hours |
+| Override file added, replaced or removed in `static/projects/` | right after the redeploy |
+
+Repository data refreshes on the first request after the 10 minutes are up, and that request still gets the old data, so the exact delay depends on traffic (the portfolio's 5-minute ping keeps it under ~15 minutes).
+
+Browsers cache each image for a week, but a changed image gets a new URL, so visitors never see a stale image once the API serves the new one.
+
+**To force a refresh**, restart or redeploy the service (on Render: *Manual Deploy* or *Restart service*). The cache is rebuilt within seconds; preview images use their original URLs until they're downloaded again.
 
 ## Error Handling
 
